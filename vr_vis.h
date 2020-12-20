@@ -24,7 +24,7 @@
 #include <vr_view_interactor.h>
 #include <vr_render_helpers.h>
 
-class vr_test :
+class vr_vis :
 	public cgv::base::node,
 	public cgv::render::drawable,
 	public cgv::gui::event_handler,
@@ -137,6 +137,9 @@ protected:
 	vec2 extent_texcrd;
 	vec2 center_left;
 	vec2 center_right;
+	/// shader program used for height field rendering
+	cgv::render::shader_program height_field_prog;
+	vec3 surface_location = vec3(0,1,1);
 
 public:
 	void init_cameras(vr::vr_kit* kit_ptr);
@@ -162,7 +165,7 @@ public:
 	/// construct a scene with a table
 	void build_scene(float w, float d, float h, float W, float tw, float td, float th, float tW);
 public:
-	vr_test();
+	vr_vis();
 
 	std::string get_type_name() { return "vr_test"; }
 

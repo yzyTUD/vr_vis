@@ -19,7 +19,7 @@
 #include "intersection.h"
 
 
-void vr_test::init_cameras(vr::vr_kit* kit_ptr)
+void vr_vis::init_cameras(vr::vr_kit* kit_ptr)
 {
 	vr::vr_camera* camera_ptr = kit_ptr->get_camera();
 	if (!camera_ptr)
@@ -45,7 +45,7 @@ void vr_test::init_cameras(vr::vr_kit* kit_ptr)
 	post_recreate_gui();
 }
 
-void vr_test::start_camera()
+void vr_vis::start_camera()
 {
 	if (!vr_view_ptr)
 		return;
@@ -59,7 +59,7 @@ void vr_test::start_camera()
 		cgv::gui::message(camera_ptr->get_last_error());
 }
 
-void vr_test::stop_camera()
+void vr_vis::stop_camera()
 {
 	if (!vr_view_ptr)
 		return;
@@ -74,7 +74,7 @@ void vr_test::stop_camera()
 }
 
 /// compute intersection points of controller ray with movable boxes
-void vr_test::compute_intersections(const vec3& origin, const vec3& direction, int ci, const rgb& color)
+void vr_vis::compute_intersections(const vec3& origin, const vec3& direction, int ci, const rgb& color)
 {
 	for (size_t i = 0; i < movable_boxes.size(); ++i) {
 		vec3 origin_box_i = origin - movable_box_translations[i];
@@ -104,7 +104,7 @@ void vr_test::compute_intersections(const vec3& origin, const vec3& direction, i
 }
 
 /// keep track of status changes
-void vr_test::on_status_change(void* kit_handle, int ci, vr::VRStatus old_status, vr::VRStatus new_status)
+void vr_vis::on_status_change(void* kit_handle, int ci, vr::VRStatus old_status, vr::VRStatus new_status)
 {
 	// ignore all but left controller changes
 	if (ci != 0)
@@ -125,7 +125,7 @@ void vr_test::on_status_change(void* kit_handle, int ci, vr::VRStatus old_status
 }
 
 /// register on device change events
-void vr_test::on_device_change(void* kit_handle, bool attach)
+void vr_vis::on_device_change(void* kit_handle, bool attach)
 {
 	if (attach) {
 		if (last_kit_handle == 0) {
@@ -150,7 +150,7 @@ void vr_test::on_device_change(void* kit_handle, bool attach)
 }
 
 /// construct boxes that represent a table of dimensions tw,td,th and leg width tW
-void vr_test::construct_table(float tw, float td, float th, float tW) {
+void vr_vis::construct_table(float tw, float td, float th, float tW) {
 	// construct table
 	rgb table_clr(0.3f, 0.2f, 0.0f);
 	boxes.push_back(box3(
@@ -169,7 +169,7 @@ void vr_test::construct_table(float tw, float td, float th, float tW) {
 }
 
 /// construct boxes that represent a room of dimensions w,d,h and wall width W
-void vr_test::construct_room(float w, float d, float h, float W, bool walls, bool ceiling) {
+void vr_vis::construct_room(float w, float d, float h, float W, bool walls, bool ceiling) {
 	// construct floor
 	boxes.push_back(box3(vec3(-0.5f*w, -W, -0.5f*d), vec3(0.5f*w, 0, 0.5f*d)));
 	box_colors.push_back(rgb(0.2f, 0.2f, 0.2f));
@@ -192,7 +192,7 @@ void vr_test::construct_room(float w, float d, float h, float W, bool walls, boo
 }
 
 /// construct boxes for environment
-void vr_test::construct_environment(float s, float ew, float ed, float w, float d, float h) {
+void vr_vis::construct_environment(float s, float ew, float ed, float w, float d, float h) {
 	std::default_random_engine generator;
 	std::uniform_real_distribution<float> distribution(0, 1);
 	unsigned n = unsigned(ew / s);
@@ -218,7 +218,7 @@ void vr_test::construct_environment(float s, float ew, float ed, float w, float 
 }
 
 /// construct boxes that can be moved around
-void vr_test::construct_movable_boxes(float tw, float td, float th, float tW, size_t nr) {
+void vr_vis::construct_movable_boxes(float tw, float td, float th, float tW, size_t nr) {
 	/*
 	vec3 extent(0.75f, 0.5f, 0.05f);
 	movable_boxes.push_back(box3(-0.5f * extent, 0.5f * extent));
@@ -247,20 +247,16 @@ void vr_test::construct_movable_boxes(float tw, float td, float th, float tW, si
 }
 
 /// construct a scene with a table
-void vr_test::build_scene(float w, float d, float h, float W, float tw, float td, float th, float tW)
+void vr_vis::build_scene(float w, float d, float h, float W, float tw, float td, float th, float tW)
 {
 	construct_room(w, d, h, W, false, false);
 	construct_table(tw, td, th, tW);
 	construct_environment(0.3f, 3 * w, 3 * d, w, d, h);
 	//construct_environment(0.4f, 0.5f, 1u, w, d, h);
-<<<<<<< HEAD
 	construct_movable_boxes(tw, td, th, tW, 20);
-=======
-	construct_movable_boxes(tw, td, th, tW, 50);
->>>>>>> remotes/origin/develop
 }
 
-vr_test::vr_test() 
+vr_vis::vr_vis() 
 {
 	frame_split = 0;
 	extent_texcrd = vec2(0.5f, 0.5f);
@@ -278,13 +274,13 @@ vr_test::vr_test()
 	camera_aspect = 1;
 	use_matrix = true;
 	show_seethrough = false;
-	set_name("vr_test");
+	set_name("vr_vis");
 	build_scene(5, 7, 3, 0.2f, 0.8f, 0.8f, 0.72f, 0.03f);
 	vr_view_ptr = 0;
 	ray_length = 2;
 	last_kit_handle = 0;
-	connect(cgv::gui::ref_vr_server().on_device_change, this, &vr_test::on_device_change);
-	connect(cgv::gui::ref_vr_server().on_status_change, this, &vr_test::on_status_change);
+	connect(cgv::gui::ref_vr_server().on_device_change, this, &vr_vis::on_device_change);
+	connect(cgv::gui::ref_vr_server().on_status_change, this, &vr_vis::on_status_change);
 
 	mesh_scale = 0.0005f;
 	mesh_location = dvec3(0, 0.85f, 0);
@@ -317,11 +313,11 @@ vr_test::vr_test()
 	state[0] = state[1] = state[2] = state[3] = IS_NONE;
 }
 	
-void vr_test::stream_help(std::ostream& os) {
-	os << "vr_test: no shortcuts defined" << std::endl;
+void vr_vis::stream_help(std::ostream& os) {
+	os << "vr_vis: no shortcuts defined" << std::endl;
 }
 	
-void vr_test::on_set(void* member_ptr)
+void vr_vis::on_set(void* member_ptr)
 {
 	if (member_ptr == &label_face_type || member_ptr == &label_font_idx) {
 		label_font_face = cgv::media::font::find_font(font_names[label_font_idx])->get_font_face(label_face_type);
@@ -342,7 +338,7 @@ void vr_test::on_set(void* member_ptr)
 	post_redraw();
 }
 	
-bool vr_test::handle(cgv::gui::event& e)
+bool vr_vis::handle(cgv::gui::event& e)
 {
 	// check if vr event flag is not set and don't process events in this case
 	if ((e.get_flags() & cgv::gui::EF_VR) == 0)
@@ -471,7 +467,7 @@ bool vr_test::handle(cgv::gui::event& e)
 	return false;
 }
 
-bool vr_test::init(cgv::render::context& ctx)
+bool vr_vis::init(cgv::render::context& ctx)
 {
 	if (!cgv::utils::has_option("NO_OPENVR"))
 		ctx.set_gamma(1.0f);
@@ -521,17 +517,23 @@ bool vr_test::init(cgv::render::context& ctx)
 	cgv::render::ref_box_renderer(ctx, 1);
 	cgv::render::ref_sphere_renderer(ctx, 1);
 	cgv::render::ref_rounded_cone_renderer(ctx, 1);
+
+	if (!height_field_prog.build_program(ctx, "height_field.glpr", true)) {
+		std::cerr << "could not build height_field shader program" << std::endl;
+		abort();
+	}
+
 	return true;
 }
 
-void vr_test::clear(cgv::render::context& ctx)
+void vr_vis::clear(cgv::render::context& ctx)
 {
 	cgv::render::ref_box_renderer(ctx, -1);
 	cgv::render::ref_sphere_renderer(ctx, -1);
 	cgv::render::ref_rounded_cone_renderer(ctx, -1);
 }
 
-void vr_test::init_frame(cgv::render::context& ctx)
+void vr_vis::init_frame(cgv::render::context& ctx)
 {
 	if (label_fbo.get_width() != label_resolution) {
 		label_tex.destruct(ctx);
@@ -651,8 +653,25 @@ void vr_test::init_frame(cgv::render::context& ctx)
 	}
 }
 
-void vr_test::draw(cgv::render::context& ctx)
+void vr_vis::draw(cgv::render::context& ctx)
 {
+	// render a surface with geometry shader, small quads are generated
+	glDisable(GL_CULL_FACE);
+	int nr_quads_per_row = 200;
+	// currently, quad = texel, transform
+	height_field_prog.enable(ctx);
+	height_field_prog.set_uniform(ctx, "nr_quads_per_row", nr_quads_per_row);
+	height_field_prog.set_uniform(ctx, "transform", vec4(surface_location, 0));
+	height_field_prog.set_uniform(ctx, "texel_extent", 1.0f / float(nr_quads_per_row));
+	height_field_prog.set_uniform(ctx, "quad_extent", 1.0f / float(nr_quads_per_row));
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glDrawArraysInstanced(GL_POINTS, 0, 1, nr_quads_per_row * nr_quads_per_row);// send points to vertex shader ... geo shader..
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	height_field_prog.disable(ctx);
+
+
 	if (MI.is_constructed()) {
 		dmat4 R;
 		mesh_orientation.put_homogeneous_matrix(R);
@@ -867,7 +886,7 @@ void vr_test::draw(cgv::render::context& ctx)
 	}
 }
 
-void vr_test::finish_draw(cgv::render::context& ctx)
+void vr_vis::finish_draw(cgv::render::context& ctx)
 {
 	return;
 	if ((!shared_texture && camera_tex.is_created()) || (shared_texture && camera_tex_id != -1)) {
@@ -903,19 +922,20 @@ void vr_test::finish_draw(cgv::render::context& ctx)
 }
 
 					//0.2f*distribution(generator)+0.1f));
-void vr_test::create_gui() {
-	add_decorator("vr_test", "heading", "level=2");
-	add_member_control(this, "mesh_scale", mesh_scale, "value_slider", "min=0.1;max=10;log=true;ticks=true");
+void vr_vis::create_gui() {
+	add_decorator("vr_vis", "heading", "level=2");
+	add_gui("surface_location", surface_location, "vector", "options='min=-3;max=3;ticks=true");
+	/*add_member_control(this, "mesh_scale", mesh_scale, "value_slider", "min=0.1;max=10;log=true;ticks=true");
 	add_gui("mesh_location", mesh_location, "vector", "options='min=-3;max=3;ticks=true");
 	add_gui("mesh_orientation", static_cast<dvec4&>(mesh_orientation), "direction", "options='min=-1;max=1;ticks=true");
 	add_member_control(this, "ray_length", ray_length, "value_slider", "min=0.1;max=10;log=true;ticks=true");
-	add_member_control(this, "show_seethrough", show_seethrough, "check");
+	add_member_control(this, "show_seethrough", show_seethrough, "check");*/
 	if(last_kit_handle) {
 		add_decorator("cameras", "heading", "level=3");
 		add_view("nr", nr_cameras);
 		if(nr_cameras > 0) {
-			connect_copy(add_button("start")->click, cgv::signal::rebind(this, &vr_test::start_camera));
-			connect_copy(add_button("stop")->click, cgv::signal::rebind(this, &vr_test::stop_camera));
+			connect_copy(add_button("start")->click, cgv::signal::rebind(this, &vr_vis::start_camera));
+			connect_copy(add_button("stop")->click, cgv::signal::rebind(this, &vr_vis::stop_camera));
 			add_view("frame_width", frame_width, "", "w=20", "  ");
 			add_view("height", frame_height, "", "w=20", "  ");
 			add_view("split", frame_split, "", "w=50");
@@ -954,9 +974,9 @@ void vr_test::create_gui() {
 	}
 	if (begin_tree_node("movable boxes", 1.f)) {
 		align("\a");
-		connect_copy(add_button("save boxes")->click, rebind(this, &vr_test::on_save_movable_boxes_cb));
-		connect_copy(add_button("load boxes")->click, rebind(this, &vr_test::on_load_movable_boxes_cb));
-		connect_copy(add_button("load target")->click, rebind(this, &vr_test::on_load_wireframe_boxes_cb));
+		connect_copy(add_button("save boxes")->click, rebind(this, &vr_vis::on_save_movable_boxes_cb));
+		connect_copy(add_button("load boxes")->click, rebind(this, &vr_vis::on_load_movable_boxes_cb));
+		connect_copy(add_button("load target")->click, rebind(this, &vr_vis::on_load_wireframe_boxes_cb));
 		align("\b");
 	}
 	if (begin_tree_node("box style", style)) {
@@ -1006,13 +1026,13 @@ void vr_test::create_gui() {
 	}
 }
 
-bool vr_test::save_boxes(const std::string fn, const std::vector<box3>& boxes, const std::vector<rgb>& box_colors, const std::vector<vec3>& box_translations, const std::vector<quat>& box_rotations)
+bool vr_vis::save_boxes(const std::string fn, const std::vector<box3>& boxes, const std::vector<rgb>& box_colors, const std::vector<vec3>& box_translations, const std::vector<quat>& box_rotations)
 {
 	std::stringstream data;
 
 
 	if (boxes.size() != box_colors.size() || boxes.size() != box_translations.size() || boxes.size() != box_rotations.size()) {
-		std::cerr << "vr_test::save_boxes: passed vectors have different sizes!";
+		std::cerr << "vr_vis::save_boxes: passed vectors have different sizes!";
 		return false;
 	}
 
@@ -1031,16 +1051,16 @@ bool vr_test::save_boxes(const std::string fn, const std::vector<box3>& boxes, c
 	}
 	std::string s = data.str();
 	if (!cgv::utils::file::write(fn, s.data(), s.size())) {
-		std::cerr << "vr_test::save_boxes: failed writing data to file: " << fn;
+		std::cerr << "vr_vis::save_boxes: failed writing data to file: " << fn;
 	}
 	return true;
 }
 
-bool vr_test::load_boxes(const std::string fn, std::vector<box3>& boxes, std::vector<rgb>& box_colors, std::vector<vec3>& box_translations, std::vector<quat>& box_rotations)
+bool vr_vis::load_boxes(const std::string fn, std::vector<box3>& boxes, std::vector<rgb>& box_colors, std::vector<vec3>& box_translations, std::vector<quat>& box_rotations)
 {
 	std::string data;
 	if (!cgv::utils::file::read(fn, data)) {
-		std::cerr << "vr_test::load_boxes: failed reading data from file: " << fn << '\n';
+		std::cerr << "vr_vis::load_boxes: failed reading data from file: " << fn << '\n';
 		return false;
 	}
 	std::istringstream f(data);
@@ -1075,7 +1095,7 @@ bool vr_test::load_boxes(const std::string fn, std::vector<box3>& boxes, std::ve
 	return true;
 }
 
-void vr_test::on_save_movable_boxes_cb()
+void vr_vis::on_save_movable_boxes_cb()
 {
 	std::string fn = cgv::gui::file_save_dialog("base file name", "Box configurations(txt):*.txt");
 	if (fn.empty())
@@ -1084,35 +1104,35 @@ void vr_test::on_save_movable_boxes_cb()
 	save_boxes(fn, movable_boxes, movable_box_colors, movable_box_translations, movable_box_rotations);
 }
 
-void vr_test::on_load_movable_boxes_cb()
+void vr_vis::on_load_movable_boxes_cb()
 {
 	std::string fn = cgv::gui::file_open_dialog("base file name", "Box configurations(txt):*.txt");
 	if (!cgv::utils::file::exists(fn)) {
-		std::cerr << "vr_test::on_load_movable_boxes_cb: file does not exist!\n";
+		std::cerr << "vr_vis::on_load_movable_boxes_cb: file does not exist!\n";
 		return;
 	}
 	clear_movable_boxes();
 	if (!load_boxes(fn, movable_boxes, movable_box_colors, movable_box_translations, movable_box_rotations)) {
-		std::cerr << "vr_test::on_load_movable_boxes_cb: failed to parse file!\n";
+		std::cerr << "vr_vis::on_load_movable_boxes_cb: failed to parse file!\n";
 		clear_movable_boxes(); //delete all boxes after a failure to reach a valid logical state
 	}
 }
 
-void vr_test::on_load_wireframe_boxes_cb()
+void vr_vis::on_load_wireframe_boxes_cb()
 {
 	std::string fn = cgv::gui::file_open_dialog("base file name", "Box configurations(txt):*.txt");
 	if (!cgv::utils::file::exists(fn)) {
-		std::cerr << "vr_test::on_load_movable_boxes_cb: file does not exist!\n";
+		std::cerr << "vr_vis::on_load_movable_boxes_cb: file does not exist!\n";
 		return;
 	}
 	clear_frame_boxes();
 	if (!load_boxes(fn, frame_boxes, frame_box_colors, frame_box_translations, frame_box_rotations)) {
-		std::cerr << "vr_test::on_load_wireframe_boxes_cb: failed to parse file!\n";
+		std::cerr << "vr_vis::on_load_wireframe_boxes_cb: failed to parse file!\n";
 		clear_frame_boxes(); //delete all boxes after a failure to reach a valid logical state
 	}
 }
 
-void vr_test::clear_movable_boxes()
+void vr_vis::clear_movable_boxes()
 {
 	movable_boxes.clear();
 	movable_box_translations.clear();
@@ -1120,7 +1140,7 @@ void vr_test::clear_movable_boxes()
 	movable_box_colors.clear();
 }
 
-void vr_test::clear_frame_boxes()
+void vr_vis::clear_frame_boxes()
 {
 	frame_boxes.clear();
 	frame_box_translations.clear();
@@ -1130,4 +1150,4 @@ void vr_test::clear_frame_boxes()
 
 #include <cgv/base/register.h>
 
-cgv::base::object_registration<vr_test> vr_test_reg("vr_test");
+cgv::base::object_registration<vr_vis> vr_test_reg("vr_vis");
